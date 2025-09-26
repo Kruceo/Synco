@@ -35,6 +35,8 @@ var watchCmd = &cobra.Command{
 	Run:   watch,
 }
 
+var interval int
+
 /**TODO error hadnling*/
 func watch(cmd *cobra.Command, args []string) {
 	for {
@@ -68,13 +70,14 @@ func watch(cmd *cobra.Command, args []string) {
 
 			processCloud2Local(entryIndex, &entry)
 			processLocal2Cloud(entryIndex, &entry)
-			time.Sleep(5 * time.Second)
+			time.Sleep(2 * time.Second)
 		}
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Duration(interval) * time.Second)
 	}
 }
 
 func init() {
+	watchCmd.Flags().IntVarP(&interval, "interval", "i", 60, "Polling interval in seconds")
 	rootCmd.AddCommand(watchCmd)
 }
 
@@ -93,7 +96,9 @@ func processLocal2Cloud(entryIndex int, entry *config.ConfigEntry) {
 
 	if currentShaBase64 != entry.LastSha256 {
 
-		log.Info("Difference in sha256 detected, updating cloud repository...", currentShaBase64, entry.LastSha256)
+		log.Info("Difference in sha256 detected, updating cloud repository...")
+		log.Debug("Old sha256:", entry.LastSha256)
+		log.Debug("New sha256:", currentShaBase64)
 
 		log.Info("Copying files from local paths to blob...")
 		for _, filePath := range entry.FilePaths {
