@@ -23,6 +23,7 @@ import (
 	"synco/utils"
 
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
 
@@ -101,12 +102,12 @@ func setup(cmd *cobra.Command, args []string) {
 		git.CheckoutNewBranch(selectedBranch, true)
 		git.Reset("hard")
 
-		processLocal2Cloud(entryIndex, entry)
+		processLocal2Cloud(entryIndex, &entry)
 	} else {
 		git.Checkout(selectedBranch)
 		git.Reset("")
 
-		processCloud2Local(entryIndex, entry)
+		processCloud2Local(entryIndex, &entry)
 	}
 }
 
@@ -115,13 +116,13 @@ func cloneIfNotExists(sshURL, blobPath string) error {
 
 	// Check if .git already exists
 	if _, err := os.Stat(gitDir); !os.IsNotExist(err) {
-		fmt.Println("Repository already exists, skipping clone")
+		log.Debug("Repository already exists, skipping clone")
 		return nil
 	}
 
 	// Run git clone
 	cmd := exec.Command("git", "clone", sshURL, blobPath)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	// cmd.Stdout = os.Stdout
+	// cmd.Stderr = os.Stderr
 	return cmd.Run()
 }

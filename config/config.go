@@ -18,6 +18,8 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+
+	"github.com/charmbracelet/log"
 )
 
 type ConfigWrapper struct {
@@ -25,6 +27,7 @@ type ConfigWrapper struct {
 }
 
 func NewConfigWrapper(path string) (ConfigWrapper, error) {
+	log.Debug("Creating ConfigWrapper for config at:", path)
 	// Check if file exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		// Create empty config object

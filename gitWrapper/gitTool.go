@@ -19,6 +19,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/charmbracelet/log"
 )
 
 type GitWrapper struct {
@@ -26,7 +28,7 @@ type GitWrapper struct {
 }
 
 func NewGitWrapper(repoDir string) GitWrapper {
-	fmt.Println("Creating GitWrapper for repo at:", repoDir)
+	log.Debug("Creating GitWrapper for repo at:", repoDir)
 	return GitWrapper{
 		gitRepositoryDir: repoDir,
 	}
@@ -34,7 +36,7 @@ func NewGitWrapper(repoDir string) GitWrapper {
 
 // RunGitCommand is a helper to run git commands and return output + error
 func (git GitWrapper) RunGitCommand(args ...string) (string, error) {
-	cmd := exec.Command("/usr/bin/git", args...)
+	cmd := exec.Command("git", args...)
 	cmd.Dir = git.gitRepositoryDir
 
 	out, err := cmd.CombinedOutput()

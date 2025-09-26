@@ -18,9 +18,11 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"synco/config"
 	gitwrapper "synco/gitWrapper"
 
+	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
 
@@ -48,12 +50,27 @@ func Execute() {
 }
 
 func init() {
+
+	if os.Getenv("SYNCO_DEBUG") == "true" {
+		log.SetLevel(log.DebugLevel)
+	}
+
 	home, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
 
-	BlobPath = path.Join(home, ".synco", "blob")
+	syncoDir := os.Getenv("SYNCO_DIR")
+	if syncoDir == "" {
+		syncoDir = path.Join(home, ".synco")
+	}
+	syncoDir, err = filepath.Abs(syncoDir)
+	if err != nil {
+		log.Fatal("Failed to get absolute path of SYNCO_DIR: "+os.Getenv("SYNCO_DIR"), err)
+		os.Exit(1)
+	}
+
+	BlobPath = path.Join(syncoDir, "blob")
 
 	if _, err := os.Stat(BlobPath); os.IsNotExist(err) {
 		err := os.MkdirAll(BlobPath, 0755)
@@ -62,7 +79,7 @@ func init() {
 		}
 	}
 
-	config, err := config.NewConfigWrapper(path.Join(BlobPath, "..", "config.json")) //  .NewConfigWrapper{ConfigPath:}
+	config, err := config.NewConfigWrapper(path.Join(syncoDir, "config.json")) //  .NewConfigWrapper{ConfigPath:}
 	if err != nil {
 		panic(err)
 	}
