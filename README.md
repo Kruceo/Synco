@@ -4,6 +4,12 @@ Synco is a powerful, file synchronization tool that leverages the power of Git t
 
 It was created to synchronize configuration files for applications that lack a native sync feature, providing a seamless and automatic way to maintain consistency.
 
+# Goals
+
+- Not intermediate server dependencie.
+- Not opening ports
+- Not public IP
+
 ## Features
 
 - **Git-Powered:** Uses a Git repository for robust and reliable file synchronization.

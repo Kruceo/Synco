@@ -38,6 +38,8 @@ var watchCmd = &cobra.Command{
 
 /**TODO error hadnling*/
 func watch(cmd *cobra.Command, args []string) {
+	a, b := git.HasLogHistory()
+	fmt.Println(a, b)
 	for {
 		entries := MainConfig.ReadAllEntries()
 		for entryIndex, entry := range entries {
@@ -77,32 +79,36 @@ func processLocal2Cloud(entryIndex int, entry config.ConfigEntry) {
 	currentSha := sha256.Sum256(buffer)
 	currentShaBase64 := base64.RawStdEncoding.EncodeToString(currentSha[:])
 
-	fmt.Println("current =", currentShaBase64)
-	fmt.Println("last    =", entry.LastSha256)
-
 	if currentShaBase64 != entry.LastSha256 {
 
+		fmt.Println("Difference in sha256 detected, updating cloud repository...")
+
+		fmt.Println("Copying files from local paths to blob...")
 		for _, filePath := range entry.FilePaths {
-			fmt.Println()
 			utils.FastCopy(filePath, path.Join(BlobPath, filepath.Base(filePath)))
 		}
 
+		fmt.Println("Adding all changes...")
 		if out, err := git.AddAll(); err != nil {
 			fmt.Println("Add error:", err, out)
 			return
 		}
 
+		fmt.Println("Committing changes...")
 		if out, err := git.Commit("Update"); err != nil {
 			fmt.Println("Commit error:", err, out)
 			git.Reset("")
 			return
 		}
 
+		fmt.Println("Pushing to remote...")
 		if out, err := git.Push("HEAD"); err != nil {
 			fmt.Println("Push error:", err, out)
 			return
 		}
 		nowLocalUnix := time.Now().Unix()
+
+		fmt.Println("Saving configuration...")
 		MainConfig.SetEntry(entryIndex, entry.Branch, entry.FilePaths, uint64(nowLocalUnix), currentShaBase64)
 	}
 }
@@ -117,17 +123,18 @@ func processCloud2Local(entryIndex int, entry config.ConfigEntry) {
 		return
 	}
 
-	println("local date =", entry.LocalLastUpdate)
-	println("cloud date =", uint64(currentCloudLastUpdate.Unix()))
-
 	/**TODO optimize file buffers, e.g: reuse buffers from copy and paste*/
 	if entry.LocalLastUpdate < uint64(currentCloudLastUpdate.Unix()) {
-		fmt.Println("Repo is more updated...")
+		fmt.Println("Remote is more updated...", currentCloudLastUpdate.Local().String())
+
+		fmt.Println("Executing git pull...")
 		git.Pull(entry.Branch)
+
+		fmt.Println("Copying files from blob to local paths...")
 		for _, filePath := range entry.FilePaths {
-			fmt.Println()
 			utils.FastCopy(path.Join(BlobPath, filepath.Base(filePath)), filePath)
 		}
+		fmt.Println("Calculating new sha256...")
 		buff := appendFilesToBuffer(entry.FilePaths)
 
 		currentSha := sha256.Sum256(buff)
@@ -135,6 +142,7 @@ func processCloud2Local(entryIndex int, entry config.ConfigEntry) {
 
 		nowLocalUnix := time.Now().Unix()
 
+		fmt.Println("Saving configuration...")
 		MainConfig.SetEntry(entryIndex, entry.Branch, entry.FilePaths, uint64(nowLocalUnix), currentShaBase64)
 
 	}

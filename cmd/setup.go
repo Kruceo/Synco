@@ -16,6 +16,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"regexp"
 	"synco/utils"
 
@@ -25,8 +28,8 @@ import (
 
 var serveCmd = &cobra.Command{
 	Use:   "setup",
-	Short: "Inicia o servidor web",
-	Long:  `Este comando inicia o servidor HTTP para a aplicação.`,
+	Short: "Adds a new configuration entry to synco",
+	Long:  `Configure a new entry to be synchronized by synco.`,
 	Run:   setup,
 }
 
@@ -65,24 +68,34 @@ func setup(cmd *cobra.Command, args []string) {
 	}
 
 	availableFiles := utils.GetOptionsFromDir("./")
-	form := huh.NewForm(
+	branchForm := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Type branch").
 				Suggestions([]string{"main", "dev"}).
 				Placeholder("synco").
 				Value(&selectedBranch),
+		))
+	branchForm.Run()
+
+	/**TODO create a 'in remote' file selector???*/
+
+	filesForm := huh.NewForm(
+		huh.NewGroup(
 			huh.NewMultiSelect[string]().
 				Options(availableFiles...).
 				Value(&selectedFiles),
-		))
-	form.Run()
+		),
+	)
+	filesForm.Run()
 
 	entryIndex, entry := MainConfig.AddEntry(selectedBranch, selectedFiles, 0)
 
 	/**TODO error handling*/
 	/**TODO verify if the selected filepaths isn't included in other entries*/
-	git.Clone(sshURL, BlobPath)
+	/**TODO force upload option? (local2cloud process)*/
+
+	cloneIfNotExists(sshURL, BlobPath)
 
 	if exists, _ := git.BranchExistsOnline(selectedBranch); !exists {
 		git.CheckoutNewBranch(selectedBranch, true)
@@ -95,4 +108,20 @@ func setup(cmd *cobra.Command, args []string) {
 
 		processCloud2Local(entryIndex, entry)
 	}
+}
+
+func cloneIfNotExists(sshURL, blobPath string) error {
+	gitDir := filepath.Join(blobPath, ".git")
+
+	// Check if .git already exists
+	if _, err := os.Stat(gitDir); !os.IsNotExist(err) {
+		fmt.Println("Repository already exists, skipping clone")
+		return nil
+	}
+
+	// Run git clone
+	cmd := exec.Command("git", "clone", sshURL, blobPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }

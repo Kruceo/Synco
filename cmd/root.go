@@ -32,19 +32,14 @@ var git gitwrapper.GitWrapper
 
 var rootCmd = &cobra.Command{
 	Use:   "synco",
-	Short: "Uma breve descrição do seu aplicativo",
-	Long: `Uma descrição mais longa que se estende por várias linhas e detalha
-o que o aplicativo faz. Por exemplo, este aplicativo é um
-gerenciador de arquivos fictício.`,
+	Short: "File Synchronization Tool",
+	Long:  `Synco is a powerful, file synchronization tool that leverages the power of Git to keep your files and configurations consistent across multiple devices. It automates the process of adding, committing, pushing, and pulling changes, making it ideal for syncing application settings or any files that need to be harmonized between different machines.`,
 
-	// A função Run é executada quando este comando é chamado.
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
 }
 
-// Execute adiciona todos os comandos filhos ao comando raiz e os define
-// para execução.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -61,7 +56,7 @@ func init() {
 	BlobPath = path.Join(home, ".synco", "blob")
 
 	if _, err := os.Stat(BlobPath); os.IsNotExist(err) {
-		err := os.MkdirAll(BlobPath, 0644)
+		err := os.MkdirAll(BlobPath, 0755)
 		if err != nil {
 			panic(err)
 		}
