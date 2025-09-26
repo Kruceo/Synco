@@ -7,7 +7,7 @@ import (
 )
 
 func FastCopy(from string, to string) {
-	file, err := os.OpenFile(from, os.O_RDONLY, 0600)
+	file, err := os.OpenFile(from, os.O_RDONLY, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -18,7 +18,7 @@ func FastCopy(from string, to string) {
 		panic(err)
 	}
 
-	file, err = os.OpenFile(to, os.O_CREATE|os.O_WRONLY, 0600)
+	file, err = os.OpenFile(to, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -28,7 +28,7 @@ func FastCopy(from string, to string) {
 }
 
 func Sha256(filePath string) [32]byte {
-	file, err := os.OpenFile(filePath, os.O_RDONLY, 0600)
+	file, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
 	if err != nil {
 		panic(err)
 	}
