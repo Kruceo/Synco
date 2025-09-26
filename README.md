@@ -6,9 +6,9 @@ It was created to synchronize configuration files for applications that lack a n
 
 # Goals
 
-- Not intermediate server dependencie.
-- Not opening ports
-- Not public IP
+- Operate without any intermediate server dependencies.
+- Avoid opening network ports.
+- Do not require a public IP.
 
 ## Features
 
