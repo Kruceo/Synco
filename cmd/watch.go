@@ -40,23 +40,35 @@ func watch(cmd *cobra.Command, args []string) {
 	for {
 		entries := MainConfig.ReadAllEntries()
 		for entryIndex, entry := range entries {
-			if hasLog, _ := git.HasLogHistory(); hasLog {
-				out, err := git.Fetch(entry.Branch)
-				if err != nil {
-					log.Error("Fetch error:", out)
-					continue
-				}
-			}
 
 			if curBranch, _ := git.ShowCurrentBranch(); curBranch != entry.Branch {
+
+				log.Debugf("Switching branch: %s to %s", curBranch, entry.Branch)
+
 				out, err := git.Checkout(entry.Branch)
 				if err != nil {
 					log.Error("Initial checkout error: "+curBranch+"=>"+entry.Branch, out)
 					continue
 				}
 			}
+
+			/*If not has log, probably is a new orphan branch*/
+			if hasLog, _ := git.HasLogHistory(); hasLog {
+				log.Debug("Repository has log history")
+
+				log.Debugf("Fetching branch: %s", entry.Branch)
+				out, err := git.Fetch(entry.Branch)
+
+				if err != nil {
+					log.Error("Fetch error:", out)
+					continue
+				}
+			}
+			log.Debugf("Processing entry: %d %s", entryIndex, entry.Branch)
+
 			processCloud2Local(entryIndex, &entry)
 			processLocal2Cloud(entryIndex, &entry)
+			time.Sleep(5 * time.Second)
 		}
 		time.Sleep(30 * time.Second)
 	}
@@ -122,9 +134,9 @@ Tests if the remote repository last commit is more recent from last push date (p
 If yes, this will download from remote and restore in local.
 */
 func processCloud2Local(entryIndex int, entry *config.ConfigEntry) {
-	currentCloudLastUpdate, _, err := git.GetCloudRepoCommitTime(entry.Branch)
+	currentCloudLastUpdate, out, err := git.GetCloudRepoCommitTime(entry.Branch)
 	if err != nil {
-		log.Error("Show error:", err)
+		log.Error("Show error:\n"+out, err)
 		return
 	}
 

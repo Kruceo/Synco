@@ -104,6 +104,7 @@ func setup(cmd *cobra.Command, args []string) {
 
 		processLocal2Cloud(entryIndex, &entry)
 	} else {
+		git.Fetch(selectedBranch)
 		git.Checkout(selectedBranch)
 		git.Reset("")
 
