@@ -117,3 +117,16 @@ func (c ConfigWrapper) SetEntry(index int, branch string, filesToWatch []string,
 	currentConfig.Entries[index] = ConfigEntry{Branch: branch, FilePaths: filesToWatch, LocalLastUpdate: lastUpdate, LastSha256: lastSha256}
 	c.writeConfig(currentConfig)
 }
+
+func (c ConfigWrapper) RemoveEntry(index int) error {
+	currentConfig := c.readConfig()
+	var newEntries []ConfigEntry
+	for i, v := range currentConfig.Entries {
+		if i != index {
+			newEntries = append(newEntries, v)
+		}
+	}
+	currentConfig.Entries = newEntries
+	c.writeConfig(currentConfig)
+	return nil
+}
