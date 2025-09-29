@@ -1,7 +1,8 @@
 package cmd
 
 import (
-	"github.com/charmbracelet/log"
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -15,14 +16,14 @@ var listCmd = &cobra.Command{
 func list(cmd *cobra.Command, args []string) {
 	entries := MainConfig.ReadAllEntries()
 	if len(entries) == 0 {
-		log.Printf("No config entries found.")
+		fmt.Printf("No config entries found.")
 		return
 	}
 
 	for index, entry := range entries {
-		log.Printf("Index: %d", index)
-		log.Printf("  Branch: %s", entry.Branch)
-		log.Printf("  File Paths: %v", entry.FilePaths)
+		fmt.Printf("Index: %d\n", index)
+		fmt.Printf("  Branch: %s\n", entry.Branch)
+		fmt.Printf("  File Paths: %v\n", entry.FilePaths)
 		//log.Infof("  Local Last Update: %d", entry.LocalLastUpdate)
 		//log.Infof("  Last SHA256: %s", entry.LastSha256)
 	}

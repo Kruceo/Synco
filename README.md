@@ -1,8 +1,12 @@
 # Synco
 
-Synco is a powerful, file synchronization tool that leverages the power of Git to keep your files and configurations consistent across multiple devices. It automates the process of adding, committing, pushing, and pulling changes, making it ideal for syncing application settings or any files that need to be harmonized between different machines.
+Synco is a light file synchronization tool that leverages the power of Git to keep your files and configurations consistent across multiple devices. It automates the process of adding, committing, pushing, and pulling changes, making it ideal for syncing application settings or any files that need to be harmonized between different machines.
 
 It was created to synchronize configuration files for applications that lack a native sync feature, providing a seamless and automatic way to maintain consistency.
+
+# Wiki
+
+- [Creating Services](./docs/services.md)
 
 # Goals
 

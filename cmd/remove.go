@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"strconv"
 
-	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
 
@@ -17,17 +17,17 @@ var removeCmd = &cobra.Command{
 func remove(cmd *cobra.Command, args []string) {
 	index, err := strconv.ParseInt(args[0], 10, 8)
 	if err != nil {
-		log.Error("Invalid index argument", err)
+		fmt.Printf("Invalid index argument: %v\n", err)
 		return
 	}
 
 	err = MainConfig.RemoveEntry(int(index))
 	if err != nil {
-		log.Error("Failed to remove entry", err)
+		fmt.Println("Failed to remove entry", err)
 		return
 	}
 
-	log.Infof("Successfully removed entry at index %d", index)
+	fmt.Printf("Successfully removed entry at index %d\n", index)
 }
 
 func init() {

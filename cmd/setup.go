@@ -79,6 +79,9 @@ func setup(cmd *cobra.Command, args []string) {
 		))
 	branchForm.Run()
 
+	if selectedBranch == "" {
+		os.Exit(1)
+	}
 	/**TODO create a 'in remote' file selector???*/
 
 	filesForm := huh.NewForm(
@@ -89,6 +92,10 @@ func setup(cmd *cobra.Command, args []string) {
 		),
 	)
 	filesForm.Run()
+
+	if len(selectedFiles) == 0 {
+		os.Exit(1)
+	}
 
 	entryIndex, entry := MainConfig.AddEntry(selectedBranch, selectedFiles, 0)
 
