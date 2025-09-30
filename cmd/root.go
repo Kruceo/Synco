@@ -18,15 +18,12 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
 	"synco/config"
 	gitwrapper "synco/gitWrapper"
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
-
-var BlobPath string
 
 var MainConfig config.ConfigWrapper
 
@@ -55,37 +52,13 @@ func init() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	home, err := os.UserHomeDir()
+	mc, err := config.NewConfigWrapper(path.Join(config.SyncoDir, "config.json")) //  .NewConfigWrapper{ConfigPath:}
 	if err != nil {
 		panic(err)
 	}
 
-	syncoDir := os.Getenv("SYNCO_DIR")
-	if syncoDir == "" {
-		syncoDir = path.Join(home, ".synco")
-	}
-	syncoDir, err = filepath.Abs(syncoDir)
-	if err != nil {
-		log.Fatal("Failed to get absolute path of SYNCO_DIR: "+os.Getenv("SYNCO_DIR"), err)
-		os.Exit(1)
-	}
+	MainConfig = mc
 
-	BlobPath = path.Join(syncoDir, "blob")
-
-	if _, err := os.Stat(BlobPath); os.IsNotExist(err) {
-		err := os.MkdirAll(BlobPath, 0755)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	config, err := config.NewConfigWrapper(path.Join(syncoDir, "config.json")) //  .NewConfigWrapper{ConfigPath:}
-	if err != nil {
-		panic(err)
-	}
-
-	MainConfig = config
-
-	git = gitwrapper.NewGitWrapper(BlobPath)
+	git = gitwrapper.NewGitWrapper(config.BlobPath)
 
 }

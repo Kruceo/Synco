@@ -37,3 +37,28 @@ func Sha256(filePath string) [32]byte {
 	data, err := io.ReadAll(file)
 	return sha256.Sum256(data)
 }
+
+func AppendFilesToBuffer(filePaths []string) ([]byte, error) {
+	buffer := []byte{}
+
+	for _, filePath := range filePaths {
+		f, err := os.Open(filePath)
+		if err != nil {
+			return nil, err
+		}
+
+		data, err := io.ReadAll(f)
+		if err != nil {
+			f.Close()
+			return nil, err
+		}
+
+		f.Close()
+
+		// O buffer recebe o caminho do arquivo e o conteúdo
+		buffer = append(buffer, []byte(filePath)...)
+		buffer = append(buffer, data...)
+	}
+
+	return buffer, nil
+}

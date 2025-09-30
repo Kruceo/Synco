@@ -20,6 +20,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"synco/config"
 	"synco/utils"
 
 	"github.com/charmbracelet/huh"
@@ -103,7 +104,7 @@ func setup(cmd *cobra.Command, args []string) {
 	/**TODO verify if the selected filepaths isn't included in other entries*/
 	/**TODO force upload option? (local2cloud process)*/
 
-	cloneIfNotExists(sshURL, BlobPath)
+	cloneIfNotExists(sshURL, config.BlobPath)
 
 	if exists, _ := git.BranchExistsOnline(selectedBranch); !exists {
 		git.CheckoutNewBranch(selectedBranch, true)

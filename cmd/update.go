@@ -17,8 +17,6 @@ package cmd
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"io"
-	"os"
 	"path"
 	"path/filepath"
 	"synco/config"
@@ -84,11 +82,8 @@ Tests if the sum of local entry files are equal the last stored (LastSha256), if
 update the remote repository and lastSha256.
 */
 func processLocal2Cloud(entryIndex int, entry *config.ConfigEntry) {
-	/**
-	concatenate all files from entry annd Calc the sha256
-	compare with entry.lastSha256 and choose if its
-	*/
-	buffer, err := appendFilesToBuffer(entry.FilePaths)
+
+	buffer, err := utils.AppendFilesToBuffer(entry.FilePaths)
 	if err != nil {
 		log.Error("Error while buffering files", err)
 		return
@@ -104,7 +99,7 @@ func processLocal2Cloud(entryIndex int, entry *config.ConfigEntry) {
 
 		log.Info("Copying files from local paths to blob...")
 		for _, filePath := range entry.FilePaths {
-			utils.FastCopy(filePath, path.Join(BlobPath, filepath.Base(filePath)))
+			utils.FastCopy(filePath, path.Join(config.BlobPath, filepath.Base(filePath)))
 		}
 
 		log.Info("Adding all changes...")
@@ -156,10 +151,10 @@ func processCloud2Local(entryIndex int, entry *config.ConfigEntry) {
 
 		log.Info("Copying files from blob to local paths...")
 		for _, filePath := range entry.FilePaths {
-			utils.FastCopy(path.Join(BlobPath, filepath.Base(filePath)), filePath)
+			utils.FastCopy(path.Join(config.BlobPath, filepath.Base(filePath)), filePath)
 		}
 		log.Info("Calculating new sha256...")
-		buff, err := appendFilesToBuffer(entry.FilePaths)
+		buff, err := utils.AppendFilesToBuffer(entry.FilePaths)
 		if err != nil {
 			log.Error("Error while buffering files", err)
 			return
@@ -176,29 +171,4 @@ func processCloud2Local(entryIndex int, entry *config.ConfigEntry) {
 		entry.LastSha256 = currentShaBase64
 		entry.LocalLastUpdate = uint64(nowLocalUnix)
 	}
-}
-
-func appendFilesToBuffer(filePaths []string) ([]byte, error) {
-	buffer := []byte{}
-
-	for _, filePath := range filePaths {
-		f, err := os.Open(filePath)
-		if err != nil {
-			return nil, err
-		}
-
-		data, err := io.ReadAll(f)
-		if err != nil {
-			f.Close()
-			return nil, err
-		}
-
-		f.Close()
-
-		// O buffer recebe o caminho do arquivo e o conteúdo
-		buffer = append(buffer, []byte(filePath)...)
-		buffer = append(buffer, data...)
-	}
-
-	return buffer, nil
 }
